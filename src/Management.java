@@ -13,28 +13,28 @@ public class Management {
 
 
     public Management() {
+
         masterRecords = new ArrayList<>();
         records = new ArrayList<>();
         records.add(new Record("Kimchi", "Buy", 20, 60, 70));
         records.add(new Record("milk", "Buy", 80, 52, 60));
-        masterRecords.addAll(records);
-        netProfit = updateProfit();
+        updateMasterRecords(records);
+        updateProfit();
     }
-    public double updateProfit(){
+    public void updateProfit(){
         Record temp;
-        for (int i = 0; i < records.size(); i++) {
+        for (int i = 0; i < masterRecords.size(); i++) {
             temp = masterRecords.get(i);
             if (temp.getType().equals("Buy")){
                 netProfit -= (temp.getPurchaseRate() * temp.getQuantity());
             }
         }
-        for (int i = 0; i < records.size(); i++) {
+        for (int i = 0; i < masterRecords.size(); i++) {
             temp = masterRecords.get(i);
             if (temp.getType().equals("Sell")){
-                netProfit += (temp.getPurchaseRate() * temp.getQuantity());
+                netProfit += (temp.getSellingRate() * temp.getQuantity());
             }
         }
-        return netProfit;
     }
 
 
@@ -166,7 +166,7 @@ public class Management {
         System.out.print("Enter the choice code : ");
         choice = sc.nextInt();
         if (choice == 1){
-            masterRecords.addAll(temp);
+            updateMasterRecords(temp);
             updateRecord(temp, isSale);
             addRecords(temp);
             updateProfit();
@@ -218,6 +218,14 @@ public class Management {
                     System.out.println("Net profit is : "+ netProfit);
                     break;
             }
+        }
+    }
+
+    private void updateMasterRecords(ArrayList<Record> records){
+        Record temp;
+        for (int i = 0; i < records.size(); i++) {
+            temp = records.get(i);
+            masterRecords.add(new Record(temp.getName(), temp.getType(), temp.getQuantity(), temp.getPurchaseRate(), temp.getSellingRate()));
         }
     }
 
