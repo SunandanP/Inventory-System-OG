@@ -13,7 +13,6 @@ public class Management {
 
 
     public Management() {
-
         masterRecords = new ArrayList<>();
         records = new ArrayList<>();
         records.add(new Record("Kimchi", "Buy", 20, 60, 70));
@@ -28,15 +27,11 @@ public class Management {
             if (temp.getType().equals("Buy")){
                 netProfit -= (temp.getPurchaseRate() * temp.getQuantity());
             }
-        }
-        for (int i = 0; i < masterRecords.size(); i++) {
-            temp = masterRecords.get(i);
-            if (temp.getType().equals("Sell")){
+            else {
                 netProfit += (temp.getSellingRate() * temp.getQuantity());
             }
         }
     }
-
 
     public void displayRecords(boolean master){
         Record temp;
@@ -91,7 +86,6 @@ public class Management {
             System.out.println("Enter Selling Rate : ");
             sellingRate = sc.nextDouble();
             beautify();
-
             if (isSale){
                 type = "Sell";
             }
@@ -103,7 +97,7 @@ public class Management {
         return temp;
     }
 
-    public boolean updateRecord(ArrayList<Record> records, boolean isSale){
+    public boolean updateRecords(ArrayList<Record> records, boolean isSale){
         Record temp1,temp2;
         boolean updated = false;
         for (int i = 0; i < this.records.size(); i++) {
@@ -167,7 +161,7 @@ public class Management {
         choice = sc.nextInt();
         if (choice == 1){
             updateMasterRecords(temp);
-            updateRecord(temp, isSale);
+            updateRecords(temp, isSale);
             addRecords(temp);
             updateProfit();
         }
@@ -179,8 +173,6 @@ public class Management {
     private void beautify(){
         System.out.println("-----------------------------------------------------------------------------------------------------------");
     }
-
-
 
 
     public void runApp(){
