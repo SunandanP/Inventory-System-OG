@@ -10,6 +10,7 @@ public class Management {
     private ArrayList<Record> records;
     private double netProfit;
     static Scanner sc = new Scanner(System.in);
+    private int counter = 0;
 
 
     public Management() {
@@ -22,15 +23,17 @@ public class Management {
     }
     public void updateProfit(){
         Record temp;
-        for (int i = 0; i < masterRecords.size(); i++) {
-            temp = masterRecords.get(i);
+        for (int i =  counter; i < masterRecords.size(); i++) {
+            temp = masterRecords.get(counter);
             if (temp.getType().equals("Buy")){
                 netProfit -= (temp.getPurchaseRate() * temp.getQuantity());
             }
             else {
                 netProfit += (temp.getSellingRate() * temp.getQuantity());
             }
+        counter++;
         }
+
     }
 
     public void displayRecords(boolean master){
