@@ -12,15 +12,17 @@ public class Management implements Serializable {
     private double netProfit;
     static Scanner sc = new Scanner(System.in);
     private int counter = 0;
+    private String name;
 
     private ObjectOutputStream oos = null;
     private ObjectInputStream ois = null;
     private File file = new File("manifest.ims");
 
 
-    public Management() {
+    public Management(String shopname) {
         masterRecords = new ArrayList<>();
         records = new ArrayList<>();
+        this.name = shopname;
     }
     public void updateProfit(){
         Record temp;
@@ -69,9 +71,11 @@ public class Management implements Serializable {
 
     private ArrayList<Record> purchase(boolean isSale){
         int input = -1;
+        boolean found = false;
+        Record tem;
         ArrayList<Record> temp = new ArrayList<>();
         String name, type;
-        double quantity, purchaseRate, sellingRate;
+        double quantity = 0, purchaseRate = 0, sellingRate = 0;
         System.out.println("Enter '0' as name when done with order.");
         beautify();
         while (true) {
@@ -81,22 +85,45 @@ public class Management implements Serializable {
             if (name.equals("0")){
                 break;
             }
-            System.out.println("Enter Quantity : ");
-            quantity = sc.nextDouble();
-            beautify();
-            System.out.println("Enter Purchase rate : ");
-            purchaseRate = sc.nextDouble();
-            beautify();
-            System.out.println("Enter Selling Rate : ");
-            sellingRate = sc.nextDouble();
-            beautify();
+
+
             if (isSale){
+                for (int i = 0; i < records.size(); i++) {
+                    tem = records.get(i);
+                    if (name.toUpperCase().equals(tem.getName())){
+                        found = true;
+                        System.out.println("Enter Quantity : ");
+                        quantity = sc.nextDouble();
+                        beautify();
+                        if (quantity > tem.getQuantity()){
+                            System.out.println("Cannot process the sale\nError : Insufficient quantity");
+                            beautify();
+                            quantity = 0;
+                        }
+                        purchaseRate = tem.getPurchaseRate();
+                        sellingRate = tem.getSellingRate();
+
+                    }
+                }
                 type = "Sell";
+                if (!found){
+                    System.out.println("Cannot process the sale\nError : No inbound records in the inventory");
+                    beautify();
+                }
+                found = false;
+
             }
             else {
                 type = "Buy";
+                System.out.println("Enter Quantity : ");
+                quantity = sc.nextDouble();
+                System.out.println("Enter Purchase Rate : ");
+                purchaseRate = sc.nextDouble();
+                System.out.println("Enter Selling Rate : ");
+                sellingRate = sc.nextDouble();
             }
-            temp.add(new Record(name, type, quantity, purchaseRate, sellingRate));
+            if (!(purchaseRate == 0 || sellingRate == 0 || quantity == 0 ))
+                temp.add(new Record(name, type, quantity, purchaseRate, sellingRate));
         }
         return temp;
     }
@@ -146,7 +173,7 @@ public class Management implements Serializable {
     }
 
 
-    public void purchaseValidator(){
+    public ArrayList<Record> purchaseValidator(){
         ArrayList<Record> temp;
         boolean isSale = false;
         System.out.println("Is it a sale?");
@@ -168,10 +195,15 @@ public class Management implements Serializable {
             updateRecords(temp, isSale);
             addRecords(temp);
             updateProfit();
+
         }
         else {
+            beautify();
             System.out.println("Your order has been cancelled");
+            beautify();
         }
+
+        return temp;
     }
 
     private void beautify(){
@@ -181,7 +213,9 @@ public class Management implements Serializable {
 
     public void runApp(){
         int input = -1;
+        boolean temp;
         String name;
+        ArrayList<Record> mostRecentOrder = null;
         System.out.println("--------------------------------------------- N&S Tally Suite ---------------------------------------------");
         System.out.println("----------------------------------- A complete Inventory Management System --------------------------------");
         while (input != 0){
@@ -189,6 +223,8 @@ public class Management implements Serializable {
             System.out.println("2. Lookup a record");
             System.out.println("3. Create a Purchase Order");
             System.out.println("4. Show Net Profit");
+            System.out.println("5. Create an Invoice");
+            System.out.println("0. Save and quit");
             input = sc.nextInt();
             switch (input){
                 case 1:
@@ -208,11 +244,21 @@ public class Management implements Serializable {
                     displayRecord(name);
                     break;
                 case 3:
-                    purchaseValidator();
+                    mostRecentOrder = purchaseValidator();
                     break;
                 case 4:
                     System.out.println("Net profit is : "+ netProfit);
                     break;
+                case 5:
+                    temp = records.get(records.size() - 1).getType().equals("Sell");
+                    if (mostRecentOrder != null)
+                        createInvoice(mostRecentOrder,temp);
+                    else{
+                        beautify();
+                        System.out.println("No recent orders found try creating one!");
+                        beautify();
+                    }
+
             }
         }
     }
@@ -236,6 +282,31 @@ public class Management implements Serializable {
         masterRecords = (ArrayList<Record>) ois.readObject();
         records = (ArrayList<Record>) ois.readObject();
         ois.close();
+    }
+
+    public void createInvoice(ArrayList<Record> records, boolean isSale){
+        double total = 0;
+        beautify();
+        System.out.println("\t\t\t\t\t\t\t\t"+name);
+        beautify();
+        System.out.println("Date : "+LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        System.out.println("Time : "+LocalDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)));
+        beautify();
+        Record temp;
+        beautify();
+        System.out.println("Particular\t\t\t\tDate\t\t\t\tTime\t\t\t\tQuantity\t\tRate");
+        beautify();
+        for (int i = 0; i < records.size(); i++) {
+            temp = records.get(i);
+            System.out.println(temp.getName()+"\t\t\t\t\t"+temp.getDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)+"\t\t\t"+temp.getDateTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))+"\t\t\t"+temp.getQuantity()+"\t\t\t"+temp.getSellingRate()+"\t\t\t  ");
+            beautify();
+            total = (temp.getQuantity() * ((!isSale)?temp.getSellingRate():temp.getPurchaseRate()));
+        }
+        System.out.println();
+        beautify();
+        System.out.println("Total : \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+total);
+        System.out.println("Thank you for shopping with us!");
+        beautify();
     }
 
 }
