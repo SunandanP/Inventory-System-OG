@@ -1,7 +1,8 @@
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Record {
+public class Record implements Serializable {
 
     private String name, type;
     private double quantity, purchaseRate, sellingRate;

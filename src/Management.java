@@ -1,10 +1,11 @@
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Management {
+public class Management implements Serializable {
 
     private ArrayList<Record> masterRecords;
     private ArrayList<Record> records;
@@ -12,14 +13,14 @@ public class Management {
     static Scanner sc = new Scanner(System.in);
     private int counter = 0;
 
+    private ObjectOutputStream oos = null;
+    private ObjectInputStream ois = null;
+    private File file = new File("manifest.ims");
+
 
     public Management() {
         masterRecords = new ArrayList<>();
         records = new ArrayList<>();
-        records.add(new Record("Kimchi", "Buy", 20, 60, 70));
-        records.add(new Record("milk", "Buy", 80, 52, 60));
-        updateMasterRecords(records);
-        updateProfit();
     }
     public void updateProfit(){
         Record temp;
@@ -222,6 +223,19 @@ public class Management {
             temp = records.get(i);
             masterRecords.add(new Record(temp.getName(), temp.getType(), temp.getQuantity(), temp.getPurchaseRate(), temp.getSellingRate()));
         }
+    }
+
+    public void writeFile() throws IOException {
+        oos = new ObjectOutputStream(new FileOutputStream(file,false));
+        oos.writeObject(masterRecords);
+        oos.writeObject(records);
+        oos.close();
+    }
+    public void readFile() throws Exception {
+        ois = new ObjectInputStream(new FileInputStream(file));
+        masterRecords = (ArrayList<Record>) ois.readObject();
+        records = (ArrayList<Record>) ois.readObject();
+        ois.close();
     }
 
 }
