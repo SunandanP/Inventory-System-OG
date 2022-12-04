@@ -309,6 +309,10 @@ public class Management implements Serializable {
         beautify();
     }
 
+    public File getFile(){
+        return file;
+    }
+
 }
 
 
